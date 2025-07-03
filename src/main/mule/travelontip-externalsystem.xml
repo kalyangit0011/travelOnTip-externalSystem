@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<flow name="travelontip-externalsystemFlow" doc:id="c35bea9c-4400-4897-91dd-ea7c8ddb3230" >
+		<http:listener doc:name="Listener" doc:id="12f4b837-039e-4343-8345-649cc2ad5768" config-ref="HTTP_Listener_config" path="/travelOnTip/{service}">
+			<http:error-response statusCode="#[vars.statusCode]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="5a722d78-0f6e-4e7d-ba40-84bba5aec451" message="flow-start"/>
+		<ee:transform doc:name="Transform Message" doc:id="799a83b5-5882-4cd0-b8c1-067c3789a3b3" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="serviceType" ><![CDATA[attributes.uriParams.service]]></ee:set-variable>
+				<ee:set-variable variableName="transactionId" ><![CDATA[attributes.headers.transactionId]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<!-- [STUDIO:"Select"]<db:select doc:name="Select" doc:id="c5450d1a-dd26-4433-a3d2-95e0122b756b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from routes where companyname= 'TravelOnTip'&#93;&#93;></db:sql>
+		</db:select> [STUDIO] -->
+		<choice doc:name="Choice" doc:id="46164647-2498-4f4e-8c9d-9a0d31975ad8" >
+			<when expression='#[vars.serviceType == "routes"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="c53dfb68-08b0-4770-af63-b0e6b62b6fe5" message="choice-routes-flow-start"/>
+				<flow-ref doc:name="Flow Reference" doc:id="76a5e469-8749-47dc-b6bc-1785ac28da2f" name="routesFlow"/>
+				<logger level="INFO" doc:name="Logger" doc:id="06741924-e0ef-4902-ab05-63ddd9a9a4c7" message="choice-routes-flow-end"/>
+			</when>
+			<when expression='#[vars.serviceType == "schedules"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="b184ac5d-29a1-40ba-88bf-996957130c44" message="choice-schedules-flow-start"/>
+				<flow-ref doc:name="Flow Reference" doc:id="4db9e934-00f0-442f-8aaa-3a4f56b390e8" name="schedulesFlow"/>
+				<logger level="INFO" doc:name="Logger" doc:id="b94aa678-d5de-40e0-a835-c9837cfc9c61" message="choice-schedules-flow-end"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="cced31aa-6d6a-4c27-aae9-4df3322bbf2d" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="f73f85cc-9b25-4f2b-bd6c-c8b4dbbef445">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c2cab5ca-367b-4c4c-baf2-ddcf5cbc5c55" message="main-flow-end"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8f52332c-9e1e-4e05-b0c9-3f4de234b43f" type="DB:CONNECTIVITY">
+				<logger level="INFO" doc:name="Logger" doc:id="c4c1986e-1745-404b-8d01-685fe81b80d9" message="DB:CONNECTIVITY error"/>
+				<ee:transform doc:name="Transform Message" doc:id="8756fa55-d3a0-4685-970e-f032fc94cd19" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description,
+	"errorType": error.errorType,
+	"time": now()
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="statusCode" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1adba88c-34cf-48f3-aecb-afeee05c774c" type="DB:BAD_SQL_SYNTAX">
+				<logger level="INFO" doc:name="Logger" doc:id="4cbc5ee2-1abc-40cf-82b4-5798cf839826" message="DB:BAD_SQL_SYNTAX error"/>
+				<ee:transform doc:name="Transform Message" doc:id="1836402a-4578-417c-b3e2-201054028347" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description,
+	"errorType": error.errorType,
+	"time": now()
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="statusCode" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7b4b3e2b-2b86-4e73-ad81-91ed4dd26046" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="41e4cc1f-b3e4-4c02-a6e7-5ac5ee75ba4f" message="ANY error"/>
+				<ee:transform doc:name="Transform Message" doc:id="d6100496-f06a-4046-8e8f-836a84ee6445" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description,
+	"errorType": error.errorType,
+	"time": now()
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="statusCode" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		
+</error-handler>
+		
+	</flow>
+</mule>

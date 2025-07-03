@@ -1,0 +1,11 @@
+http:
+ listener:
+  host: "localhost"
+  port: "8081"
+  
+db:
+ oracle:
+  host: "localhost"
+  port: "1521"
+  user: "system"
+  password: "Welcome2$"

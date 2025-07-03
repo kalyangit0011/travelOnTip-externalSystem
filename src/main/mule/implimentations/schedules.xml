@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="schedulesFlow" doc:id="95fed8a4-3d51-4207-9c00-5a48489cef07" >
+		<logger level="INFO" doc:name="Logger" doc:id="969ed478-cb15-474c-9481-d63e3090eacb" message="schedules-flow-start"/>
+		<db:select doc:name="Select" doc:id="d0e96644-b4fb-4282-b83a-21f953cf0447" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from schedules]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="d821a5ba-15b4-4f19-bf62-ad4cc69fedc7" message="schedules-flow-end"/>
+	</flow>
+</mule>
