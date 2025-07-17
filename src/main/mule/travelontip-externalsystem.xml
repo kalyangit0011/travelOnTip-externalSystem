@@ -8,11 +8,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	
 	<flow name="travelontip-externalsystemFlow" doc:id="c35bea9c-4400-4897-91dd-ea7c8ddb3230" >
-		<http:listener doc:name="Listener" doc:id="12f4b837-039e-4343-8345-649cc2ad5768" config-ref="HTTP_Listener_config" path="/travelOnTip/{service}">
-			<http:error-response statusCode="#[vars.statusCode]" >
-				<http:body ><![CDATA[#[payload]]]></http:body>
-			</http:error-response>
-		</http:listener>
+		<http:listener doc:id="f1039396-7f7f-44b4-b6c2-9cbcd19e5f70" doc:name="" config-ref="HTTP_Listener_config" path="travelOnTip/{service}"/>
 		<logger level="INFO" doc:name="Logger" doc:id="5a722d78-0f6e-4e7d-ba40-84bba5aec451" message="flow-start"/>
 		<ee:transform doc:name="Transform Message" doc:id="799a83b5-5882-4cd0-b8c1-067c3789a3b3" >
 			<ee:message >
@@ -22,16 +18,16 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<ee:set-variable variableName="transactionId" ><![CDATA[attributes.headers.transactionId]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<!-- [STUDIO:"Select"]<db:select doc:name="Select" doc:id="c5450d1a-dd26-4433-a3d2-95e0122b756b" config-ref="Database_Config">
-			<db:sql ><![CDATA[select * from routes where companyname= 'TravelOnTip'&#93;&#93;></db:sql>
-		</db:select> [STUDIO] -->
-		<choice doc:name="Choice" doc:id="46164647-2498-4f4e-8c9d-9a0d31975ad8" >
-			<when expression='#[vars.serviceType == "routes"]'>
+		<db:select doc:name="Select" doc:id="c5450d1a-dd26-4433-a3d2-95e0122b756b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from schedules]]></db:sql>
+		</db:select>
+		<!-- [STUDIO:"Choice"]<choice doc:name="Choice" doc:id="46164647-2498-4f4e-8c9d-9a0d31975ad8" >
+			<when expression='#[vars.serviceType == "routes"&#93;'>
 				<logger level="INFO" doc:name="Logger" doc:id="c53dfb68-08b0-4770-af63-b0e6b62b6fe5" message="choice-routes-flow-start"/>
 				<flow-ref doc:name="Flow Reference" doc:id="76a5e469-8749-47dc-b6bc-1785ac28da2f" name="routesFlow"/>
 				<logger level="INFO" doc:name="Logger" doc:id="06741924-e0ef-4902-ab05-63ddd9a9a4c7" message="choice-routes-flow-end"/>
 			</when>
-			<when expression='#[vars.serviceType == "schedules"]'>
+			<when expression='#[vars.serviceType == "schedules"&#93;'>
 				<logger level="INFO" doc:name="Logger" doc:id="b184ac5d-29a1-40ba-88bf-996957130c44" message="choice-schedules-flow-start"/>
 				<flow-ref doc:name="Flow Reference" doc:id="4db9e934-00f0-442f-8aaa-3a4f56b390e8" name="schedulesFlow"/>
 				<logger level="INFO" doc:name="Logger" doc:id="b94aa678-d5de-40e0-a835-c9837cfc9c61" message="choice-schedules-flow-end"/>
@@ -39,7 +35,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			<otherwise >
 				<logger level="INFO" doc:name="Logger" doc:id="cced31aa-6d6a-4c27-aae9-4df3322bbf2d" />
 			</otherwise>
-		</choice>
+		</choice> [STUDIO] -->
 		<ee:transform doc:name="Transform Message" doc:id="f73f85cc-9b25-4f2b-bd6c-c8b4dbbef445">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0

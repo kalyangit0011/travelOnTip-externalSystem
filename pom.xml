@@ -4,7 +4,7 @@
 
 	<groupId>com.mycompany</groupId>
 	<artifactId>travelontip-externalsystem</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>mule-application</packaging>
 
 	<name>travelontip-externalsystem</name>
@@ -35,11 +35,8 @@
 							<groupId>com.mycompany</groupId>
 							<artifactId>ojdbc8-23.3.0.23.09</artifactId>
 						</sharedLibrary>
-						<sharedLibrary>
-							<groupId>com.oracle.ojdbc</groupId>
-							<artifactId>ojdbc8</artifactId>
-						</sharedLibrary>
 					</sharedLibraries>
+					<classifier>---- select project type ----</classifier>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -65,14 +62,15 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
+			<groupId>com.mulesoft.modules</groupId>
+			<artifactId>mule-secure-configuration-property-module</artifactId>
+			<version>1.2.7</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
 			<groupId>com.mycompany</groupId>
 			<artifactId>ojdbc8-23.3.0.23.09</artifactId>
 			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.oracle.ojdbc</groupId>
-			<artifactId>ojdbc8</artifactId>
-			<version>19.3.0.0</version>
 		</dependency>
 	</dependencies>
 
